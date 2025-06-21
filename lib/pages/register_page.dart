@@ -1,214 +1,140 @@
 import 'dart:io';
-
-import 'package:finstagram/services/firebase_service.dart';
 import 'package:flutter/material.dart';
-import 'package:file_picker/file_picker.dart';
-import 'package:get_it/get_it.dart';
+import 'package:image_picker/image_picker.dart';
+import '../services/cloudinary_service.dart';
+import '../services/firebase_service.dart';
 
 class RegisterPage extends StatefulWidget {
+  const RegisterPage({super.key});
+
   @override
-  State<StatefulWidget> createState() {
-    return _RegisterPageState();
-  }
+  State<RegisterPage> createState() => _RegisterPageState();
 }
 
 class _RegisterPageState extends State<RegisterPage> {
-  double? _deviceHeight, _deviceWidth;
+  final FirebaseService _firebaseService = FirebaseService();
 
-  FirebaseService? _firebaseService;
+  final ImagePicker _picker = ImagePicker();
+  File? _selectedImage;
+  String? _uploadedImageUrl;
 
-  final GlobalKey<FormState> _registerFormKey = GlobalKey<FormState>();
-  String? _name, _email, _password;
-  File? _image;
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
 
-  @override
-  void initState() {
-    super.initState();
-    _firebaseService = GetIt.instance.get<FirebaseService>();
+  bool _isUploading = false;
+
+  Future<void> _pickAndUploadImage() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() => _isUploading = true);
+
+      final cloudinary = CloudinaryService();
+      final uploadedUrl = await cloudinary.uploadImage(pickedFile.path);
+
+      if (uploadedUrl != null) {
+        setState(() {
+          _selectedImage = File(pickedFile.path);
+          _uploadedImageUrl = uploadedUrl;
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("❌ Failed to upload profile picture")),
+        );
+      }
+
+      setState(() => _isUploading = false);
+    }
+  }
+
+  Future<void> _registerUser() async {
+    final name = _nameController.text.trim();
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+
+    if (name.isEmpty ||
+        email.isEmpty ||
+        password.isEmpty ||
+        _uploadedImageUrl == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Please fill all fields and upload an image")),
+      );
+      return;
+    }
+
+    setState(() => _isUploading = true);
+
+    final success = await _firebaseService.registerUser(
+      name: name,
+      email: email,
+      password: password,
+      profileImageUrl: _uploadedImageUrl!,
+    );
+
+    setState(() => _isUploading = false);
+
+    if (success) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("✅ Registration successful")));
+      Navigator.pop(context); // or navigate to home
+    } else {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("❌ Registration failed")));
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    _deviceHeight = MediaQuery.of(context).size.height;
-    _deviceWidth = MediaQuery.of(context).size.width;
     return Scaffold(
-      body: SafeArea(
-        child: Container(
-          padding: EdgeInsets.symmetric(horizontal: _deviceWidth! * 0.05),
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              mainAxisSize: MainAxisSize.max,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                _titleWidget(),
-                _profileImageWidget(),
-                _registrationForm(),
-                _registerButton(),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _titleWidget() {
-    return const Text(
-      "Finstagram",
-      style: TextStyle(fontSize: 25, fontWeight: FontWeight.w600),
-    );
-  }
-
-  Widget _registrationForm() {
-    return Container(
-      height: _deviceHeight! * 0.30,
-      child: Form(
-        key: _registerFormKey,
+      appBar: AppBar(title: Text("Register")),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(16),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          mainAxisSize: MainAxisSize.max,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [_nameTextField(), _emailTextField(), _passwordTextField()],
-        ),
-      ),
-    );
-  }
-
-  Widget _profileImageWidget() {
-    var _imageProvider =
-        _image != null
-            ? FileImage(_image!)
-            : const NetworkImage('https://i.pravatar.cc/300');
-    return GestureDetector(
-      onTap: () {
-        FilePicker.platform.pickFiles(type: FileType.image).then((_result) {
-          setState(() {
-            _image = File(_result!.files.first.path!);
-          });
-        });
-      },
-      child: Container(
-        height: _deviceHeight! * 0.15,
-        width: _deviceWidth! * 0.5,
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            fit: BoxFit.cover,
-            image: _imageProvider as ImageProvider,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _nameTextField() {
-    return TextFormField(
-      decoration: const InputDecoration(hintText: "Name...."),
-      validator: (_value) => _value!.length > 0 ? null : "Please enter a name",
-      onSaved: (_value) {
-        setState(() {
-          _name = _value;
-        });
-      },
-    );
-  }
-
-  Widget _emailTextField() {
-    return TextFormField(
-      decoration: const InputDecoration(hintText: "Email"),
-      onSaved: (_value) {
-        setState(() {
-          _email = _value;
-        });
-      },
-      validator: (_value) {
-        bool _result = _value!.contains(
-          RegExp(r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$"),
-        );
-        return _result ? null : "Please enter a valid email";
-      },
-    );
-  }
-
-  Widget _passwordTextField() {
-    return TextFormField(
-      obscureText: true,
-      decoration: const InputDecoration(hintText: "Password"),
-      onSaved: (_value) {
-        setState(() {
-          _password = _value;
-        });
-      },
-      validator:
-          (_value) =>
-              _value!.length > 6
-                  ? null
-                  : "Please enter a password greater than 6 characters",
-    );
-  }
-
-  Widget _registerButton() {
-    return MaterialButton(
-      onPressed: _registerUser,
-      minWidth: _deviceWidth! * 0.50,
-      height: _deviceHeight! * 0.05,
-      color: Colors.red,
-      child: const Text(
-        "Register",
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: 20,
-          fontWeight: FontWeight.w400,
-        ),
-      ),
-    );
-  }
-
-  void _registerUser() async {
-    if (_registerFormKey.currentState!.validate()) {
-      _registerFormKey.currentState!.save();
-
-      bool _result = await _firebaseService!.registerUser(
-        name: _name!,
-        email: _email!,
-        password: _password!,
-      );
-
-      if (_result && mounted) {
-        // Show success dialog first
-        await showDialog(
-          context: context,
-          builder:
-              (_) => AlertDialog(
-                title: const Text("Success"),
-                content: const Text("Valid User!"),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop(); // Close dialog
-                    },
-                    child: const Text("OK"),
-                  ),
-                ],
+          children: [
+            GestureDetector(
+              onTap: _pickAndUploadImage,
+              child: CircleAvatar(
+                radius: 50,
+                backgroundImage:
+                    _uploadedImageUrl != null
+                        ? NetworkImage(_uploadedImageUrl!)
+                        : _selectedImage != null
+                        ? FileImage(_selectedImage!) as ImageProvider
+                        : AssetImage("assets/default_profile.png"),
+                child:
+                    _uploadedImageUrl == null && _selectedImage == null
+                        ? Icon(Icons.add_a_photo, size: 30)
+                        : null,
               ),
-        );
-
-        // ✅ Then pop the screen, safely
-        if (mounted) {
-          Navigator.pop(context);
-        }
-
-        // ✅ Then reset the form
-        if (mounted) {
-          _registerFormKey.currentState!.reset();
-          setState(() {
-            _name = null;
-            _email = null;
-            _password = null;
-            _image = null;
-          });
-        }
-      }
-    }
+            ),
+            SizedBox(height: 20),
+            TextField(
+              controller: _nameController,
+              decoration: InputDecoration(labelText: "Name"),
+            ),
+            SizedBox(height: 10),
+            TextField(
+              controller: _emailController,
+              decoration: InputDecoration(labelText: "Email"),
+            ),
+            SizedBox(height: 10),
+            TextField(
+              controller: _passwordController,
+              obscureText: true,
+              decoration: InputDecoration(labelText: "Password"),
+            ),
+            SizedBox(height: 20),
+            _isUploading
+                ? CircularProgressIndicator()
+                : ElevatedButton(
+                  onPressed: _registerUser,
+                  child: Text("Register"),
+                ),
+          ],
+        ),
+      ),
+    );
   }
 }
