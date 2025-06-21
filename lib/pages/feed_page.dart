@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; // for timestamp formatting
+import 'package:intl/intl.dart';
 
 class FeedPage extends StatefulWidget {
   @override
@@ -13,7 +13,13 @@ class _FeedPageState extends State<FeedPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Feed")),
+      appBar: AppBar(
+        title: Text("Feed"),
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        elevation: 1,
+        foregroundColor: Colors.black,
+      ),
       body: StreamBuilder<QuerySnapshot>(
         stream:
             FirebaseFirestore.instance
@@ -25,7 +31,12 @@ class _FeedPageState extends State<FeedPage> {
             return Center(child: CircularProgressIndicator());
 
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty)
-            return Center(child: Text("No posts yet"));
+            return Center(
+              child: Text(
+                "No posts yet",
+                style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+              ),
+            );
 
           final posts = snapshot.data!.docs;
 
@@ -44,55 +55,60 @@ class _FeedPageState extends State<FeedPage> {
               ).format(timestamp.toDate());
 
               return Card(
-                margin: EdgeInsets.all(12),
-                elevation: 3,
+                margin: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                elevation: 2,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(15),
                 ),
+                clipBehavior: Clip.antiAlias,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.vertical(
-                        top: Radius.circular(10),
-                      ),
-                      child: Image.network(
-                        imageUrl,
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                        height: 200,
-                        errorBuilder:
-                            (_, __, ___) => Container(
-                              height: 200,
-                              color: Colors.grey[300],
-                              child: Center(child: Icon(Icons.broken_image)),
-                            ),
-                      ),
+                    Image.network(
+                      imageUrl,
+                      width: double.infinity,
+                      height: 220,
+                      fit: BoxFit.cover,
+                      errorBuilder:
+                          (_, __, ___) => Container(
+                            height: 220,
+                            color: Colors.grey[300],
+                            child: Center(child: Icon(Icons.broken_image)),
+                          ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.all(8.0),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
                       child: Text(caption, style: TextStyle(fontSize: 16)),
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
+                        horizontal: 12,
                         vertical: 4,
                       ),
-                      child: Text(
-                        "Posted by: $email",
-                        style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "By: $email",
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                          Text(
+                            formattedTime,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[500],
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      child: Text(
-                        formattedTime,
-                        style: TextStyle(fontSize: 12, color: Colors.grey[500]),
-                      ),
-                    ),
+                    SizedBox(height: 8),
                   ],
                 ),
               );

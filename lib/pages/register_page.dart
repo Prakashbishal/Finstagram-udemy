@@ -13,7 +13,6 @@ class RegisterPage extends StatefulWidget {
 
 class _RegisterPageState extends State<RegisterPage> {
   final FirebaseService _firebaseService = FirebaseService();
-
   final ImagePicker _picker = ImagePicker();
   File? _selectedImage;
   String? _uploadedImageUrl;
@@ -28,7 +27,6 @@ class _RegisterPageState extends State<RegisterPage> {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       setState(() => _isUploading = true);
-
       final cloudinary = CloudinaryService();
       final uploadedUrl = await cloudinary.uploadImage(pickedFile.path);
 
@@ -77,7 +75,7 @@ class _RegisterPageState extends State<RegisterPage> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text("✅ Registration successful")));
-      Navigator.pop(context); // or navigate to home
+      Navigator.pop(context);
     } else {
       ScaffoldMessenger.of(
         context,
@@ -88,9 +86,12 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Register")),
+      appBar: AppBar(
+        title: Text("Register"),
+        backgroundColor: Colors.deepPurple,
+      ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(16),
+        padding: EdgeInsets.all(20),
         child: Column(
           children: [
             GestureDetector(
@@ -112,25 +113,40 @@ class _RegisterPageState extends State<RegisterPage> {
             SizedBox(height: 20),
             TextField(
               controller: _nameController,
-              decoration: InputDecoration(labelText: "Name"),
+              decoration: InputDecoration(
+                labelText: "Name",
+                border: OutlineInputBorder(),
+              ),
             ),
-            SizedBox(height: 10),
+            SizedBox(height: 15),
             TextField(
               controller: _emailController,
-              decoration: InputDecoration(labelText: "Email"),
+              decoration: InputDecoration(
+                labelText: "Email",
+                border: OutlineInputBorder(),
+              ),
             ),
-            SizedBox(height: 10),
+            SizedBox(height: 15),
             TextField(
               controller: _passwordController,
               obscureText: true,
-              decoration: InputDecoration(labelText: "Password"),
+              decoration: InputDecoration(
+                labelText: "Password",
+                border: OutlineInputBorder(),
+              ),
             ),
-            SizedBox(height: 20),
+            SizedBox(height: 25),
             _isUploading
                 ? CircularProgressIndicator()
-                : ElevatedButton(
+                : ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.deepPurple,
+                    foregroundColor: Colors.white,
+                    minimumSize: Size(double.infinity, 50),
+                  ),
+                  icon: Icon(Icons.person_add),
+                  label: Text("Register"),
                   onPressed: _registerUser,
-                  child: Text("Register"),
                 ),
           ],
         ),

@@ -11,24 +11,21 @@ class FirebaseService {
 
   FirebaseService();
 
-  // ✅ Register a new user with Cloudinary profile image
   Future<bool> registerUser({
     required String name,
     required String email,
     required String password,
-    required String profileImageUrl, // 👈 Added for image support
+    required String profileImageUrl,
   }) async {
     try {
-      // Firebase Auth user creation
       UserCredential _userCredential = await _auth
           .createUserWithEmailAndPassword(email: email, password: password);
       String _userId = _userCredential.user!.uid;
 
-      // Firestore user document creation
       await _db.collection(USER_COLLECTION).doc(_userId).set({
         "name": name,
         "email": email,
-        "image": profileImageUrl, // 👈 Save actual image
+        "image": profileImageUrl,
       });
 
       return true;
@@ -38,7 +35,6 @@ class FirebaseService {
     }
   }
 
-  // ✅ Login existing user
   Future<bool> loginUser({
     required String email,
     required String password,
@@ -61,7 +57,6 @@ class FirebaseService {
     }
   }
 
-  // ✅ Fetch user data by UID
   Future<Map> getUserData({required String uid}) async {
     DocumentSnapshot _doc =
         await _db.collection(USER_COLLECTION).doc(uid).get();

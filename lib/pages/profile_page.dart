@@ -21,8 +21,6 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<void> _loadUserData() async {
     final uid = _auth.currentUser?.uid;
-    print("🔑 Current logged in UID: $uid");
-
     if (uid != null) {
       final doc = await _db.collection('users').doc(uid).get();
       setState(() {
@@ -36,7 +34,11 @@ class _ProfilePageState extends State<ProfilePage> {
     final uid = _auth.currentUser?.uid;
 
     return Scaffold(
-      appBar: AppBar(title: Text("Profile"), centerTitle: true),
+      appBar: AppBar(
+        title: Text("Profile"),
+        centerTitle: true,
+        backgroundColor: Colors.deepPurple,
+      ),
       body:
           userData == null
               ? Center(child: CircularProgressIndicator())
@@ -50,11 +52,11 @@ class _ProfilePageState extends State<ProfilePage> {
                   SizedBox(height: 10),
                   Text(
                     userData!['name'] ?? '',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                   Text(
                     userData!['email'] ?? '',
-                    style: TextStyle(color: Colors.grey[700]),
+                    style: TextStyle(color: Colors.grey[600], fontSize: 14),
                   ),
                   SizedBox(height: 20),
                   Expanded(
@@ -70,27 +72,28 @@ class _ProfilePageState extends State<ProfilePage> {
                           return Center(child: CircularProgressIndicator());
 
                         if (!snapshot.hasData || snapshot.data!.docs.isEmpty)
-                          return Center(child: Text("No posts yet"));
+                          return Center(
+                            child: Text(
+                              "No posts yet",
+                              style: TextStyle(color: Colors.grey),
+                            ),
+                          );
 
                         final posts = snapshot.data!.docs;
 
                         return GridView.builder(
-                          padding: EdgeInsets.all(8),
+                          padding: EdgeInsets.all(12),
                           gridDelegate:
                               SliverGridDelegateWithFixedCrossAxisCount(
                                 crossAxisCount: 3,
-                                mainAxisSpacing: 8,
                                 crossAxisSpacing: 8,
+                                mainAxisSpacing: 8,
+                                childAspectRatio: 1,
                               ),
                           itemCount: posts.length,
                           itemBuilder: (context, index) {
                             final post = posts[index];
                             final imageUrl = post['image_url'];
-                            final postUserId = post['user_id'];
-
-                            print(
-                              "🧾 Post UID: $postUserId | Logged UID: $uid",
-                            );
 
                             return ClipRRect(
                               borderRadius: BorderRadius.circular(8),
@@ -98,8 +101,10 @@ class _ProfilePageState extends State<ProfilePage> {
                                 imageUrl,
                                 fit: BoxFit.cover,
                                 errorBuilder:
-                                    (_, __, ___) =>
-                                        Container(color: Colors.grey),
+                                    (_, __, ___) => Container(
+                                      color: Colors.grey[300],
+                                      child: Icon(Icons.broken_image, size: 30),
+                                    ),
                               ),
                             );
                           },

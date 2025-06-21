@@ -19,7 +19,6 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _firebaseService = GetIt.instance.get<FirebaseService>();
   }
@@ -30,17 +29,19 @@ class _LoginPageState extends State<LoginPage> {
     _deviceWidth = MediaQuery.of(context).size.width;
     return Scaffold(
       body: SafeArea(
-        child: Container(
-          padding: EdgeInsets.symmetric(horizontal: _deviceWidth! * 0.05),
-          child: Center(
+        child: SingleChildScrollView(
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: _deviceWidth! * 0.08),
+            height: _deviceHeight,
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              mainAxisSize: MainAxisSize.max,
-              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 _titleWidget(),
+                SizedBox(height: 30),
                 _loginForm(),
-                _loginbutton(),
+                SizedBox(height: 30),
+                _loginButton(),
+                SizedBox(height: 15),
                 _registerPageLink(),
               ],
             ),
@@ -54,35 +55,36 @@ class _LoginPageState extends State<LoginPage> {
     return const Text(
       "Finstagram",
       style: TextStyle(
-        color: Colors.black,
-        fontSize: 35,
-        fontWeight: FontWeight.w800,
+        color: Colors.deepPurple,
+        fontSize: 40,
+        fontWeight: FontWeight.bold,
+        letterSpacing: 1.2,
       ),
     );
   }
 
   Widget _loginForm() {
-    return Container(
-      height: _deviceHeight! * 0.20,
-      child: Form(
-        key: _loginFormKey,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          mainAxisSize: MainAxisSize.max,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [_emailTextField(), _passwordTextField()],
-        ),
+    return Form(
+      key: _loginFormKey,
+      child: Column(
+        children: [
+          _emailTextField(),
+          SizedBox(height: 20),
+          _passwordTextField(),
+        ],
       ),
     );
   }
 
   Widget _emailTextField() {
     return TextFormField(
-      decoration: const InputDecoration(hintText: "Email"),
+      decoration: InputDecoration(
+        hintText: "Email",
+        prefixIcon: Icon(Icons.email),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+      ),
       onSaved: (_value) {
-        setState(() {
-          _email = _value;
-        });
+        _email = _value;
       },
       validator: (_value) {
         bool _result = _value!.contains(
@@ -96,32 +98,35 @@ class _LoginPageState extends State<LoginPage> {
   Widget _passwordTextField() {
     return TextFormField(
       obscureText: true,
-      decoration: const InputDecoration(hintText: "Password"),
+      decoration: InputDecoration(
+        hintText: "Password",
+        prefixIcon: Icon(Icons.lock),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+      ),
       onSaved: (_value) {
-        setState(() {
-          _password = _value;
-        });
+        _password = _value;
       },
       validator:
           (_value) =>
-              _value!.length > 6
-                  ? null
-                  : "Please enter a password greater than 6 characters",
+              _value!.length > 6 ? null : "Password must be 6+ characters",
     );
   }
 
-  Widget _loginbutton() {
-    return MaterialButton(
-      onPressed: _loginUser,
-      minWidth: _deviceWidth! * 0.5,
+  Widget _loginButton() {
+    return SizedBox(
+      width: double.infinity,
       height: _deviceHeight! * 0.06,
-      color: Colors.red,
-      child: const Text(
-        "Login",
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: 25,
-          fontWeight: FontWeight.w600,
+      child: ElevatedButton(
+        onPressed: _loginUser,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.deepPurple,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+        child: const Text(
+          "Login",
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
         ),
       ),
     );
@@ -130,12 +135,19 @@ class _LoginPageState extends State<LoginPage> {
   Widget _registerPageLink() {
     return GestureDetector(
       onTap: () => Navigator.pushNamed(context, 'register'),
-      child: const Text(
-        "Don't have an account?",
-        style: TextStyle(
-          color: Colors.blue,
-          fontSize: 15,
-          fontWeight: FontWeight.w500,
+      child: RichText(
+        text: TextSpan(
+          text: "Don't have an account? ",
+          style: TextStyle(color: Colors.black87),
+          children: [
+            TextSpan(
+              text: "Register",
+              style: TextStyle(
+                color: Colors.deepPurple,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
         ),
       ),
     );

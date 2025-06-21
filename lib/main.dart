@@ -16,17 +16,38 @@ void main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Finstagram',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primarySwatch: Colors.red,
-        appBarTheme: AppBarTheme(
-          backgroundColor: const Color.fromARGB(255, 244, 92, 54),
-          foregroundColor: const Color.fromARGB(255, 255, 255, 255),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.redAccent,
+          brightness: Brightness.light,
         ),
+        scaffoldBackgroundColor: Colors.grey[100],
+        appBarTheme: AppBarTheme(
+          backgroundColor: Colors.white,
+          elevation: 1,
+          titleTextStyle: TextStyle(
+            color: Colors.black,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+          iconTheme: IconThemeData(color: Colors.black),
+        ),
+        textTheme: ThemeData.light().textTheme.apply(
+          fontFamily: 'Roboto',
+          bodyColor: Colors.black,
+          displayColor: Colors.black87,
+        ),
+        snackBarTheme: SnackBarThemeData(
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.black87,
+          contentTextStyle: TextStyle(color: Colors.white),
+        ),
+        useMaterial3: true,
       ),
       initialRoute: 'login',
       routes: {

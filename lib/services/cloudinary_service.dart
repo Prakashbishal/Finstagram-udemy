@@ -15,7 +15,7 @@ class CloudinaryService {
           resourceType: CloudinaryResourceType.Image,
         ),
       );
-      print("Upload successful! URL: ${response.secureUrl}");
+      print("✅ Upload successful! URL: ${response.secureUrl}");
       return response.secureUrl;
     } catch (e) {
       print("❌ Cloudinary upload error: $e");

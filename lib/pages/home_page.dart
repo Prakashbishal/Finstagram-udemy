@@ -4,9 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:finstagram/pages/feed_page.dart';
 import 'package:finstagram/pages/profile_page.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:finstagram/services/cloudinary_service.dart'; // your helper
+import 'package:finstagram/services/cloudinary_service.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -50,10 +49,16 @@ class _HomePageState extends State<HomePage> {
       builder: (context) {
         TextEditingController _captionController = TextEditingController();
         return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           title: Text("Enter Caption"),
           content: TextField(
             controller: _captionController,
-            decoration: InputDecoration(hintText: "Say something..."),
+            decoration: InputDecoration(
+              hintText: "Say something...",
+              border: OutlineInputBorder(),
+            ),
           ),
           actions: [
             TextButton(
@@ -110,13 +115,18 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Finstagram"),
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 1,
         actions: [IconButton(icon: Icon(Icons.logout), onPressed: _logoutUser)],
       ),
       body: _pages[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
-        selectedItemColor: Colors.blue,
+        selectedItemColor: Colors.deepPurple,
+        unselectedItemColor: Colors.grey,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.feed), label: "Feed"),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
@@ -124,6 +134,7 @@ class _HomePageState extends State<HomePage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _uploadPost,
+        backgroundColor: Colors.deepPurple,
         child: Icon(Icons.add_a_photo),
       ),
     );
