@@ -12,6 +12,6 @@ class _FeedPageState extends State<FeedPage> {
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
-    return Container(color: Colors.yellow);
+    return Container(color: const Color.fromARGB(255, 75, 59, 255));
   }
 }
