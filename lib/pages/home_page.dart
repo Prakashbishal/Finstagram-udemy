@@ -1,6 +1,7 @@
 import 'package:finstagram/pages/feed_page.dart';
 import 'package:finstagram/pages/profile_page.dart';
 import 'package:flutter/material.dart';
+import '../pages/post_uploader.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -18,7 +19,15 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: const Text("Finstagram"),
         actions: [
-          GestureDetector(onTap: () {}, child: Icon(Icons.add_a_photo)),
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => PostUploader()),
+              );
+            },
+            child: Icon(Icons.add_a_photo),
+          ),
           Padding(
             padding: const EdgeInsets.only(left: 8.0, right: 8.0),
             child: GestureDetector(onTap: () {}, child: Icon(Icons.logout)),
